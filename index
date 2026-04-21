@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Create your listing - Sell your item</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Market Sans", Arial, sans-serif;
+    background: #f7f7f7;
+    color: #111820;
+  }
+  header {
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header .brand { font-weight: 700; font-size: 22px; letter-spacing: -0.5px; }
+  header .brand span:nth-child(1) { color: #e53238; }
+  header .brand span:nth-child(2) { color: #0064d2; }
+  header .brand span:nth-child(3) { color: #f5af02; }
+  header .brand span:nth-child(4) { color: #86b817; }
+  header .page-title { font-size: 14px; color: #555; }
+  main { max-width: 960px; margin: 32px auto; padding: 0 24px; }
+  h1 { font-size: 28px; margin: 0 0 24px 0; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 { font-size: 18px; margin: 0 0 16px 0; }
+
+  /* eBay-style field/textbox design-system classes — mirrored from real eBay */
+  .se-field { margin-bottom: 16px; }
+  .se-field--fluid { width: 100%; }
+  .se-field > label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+  }
+  .se-field .hint {
+    font-size: 12px;
+    color: #757575;
+    margin-top: 4px;
+  }
+  .se-textbox--container {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+  .se-textbox--container input,
+  .se-textbox--container textarea {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #c7c7c7;
+    border-radius: 4px;
+    background: #fff;
+    font-family: inherit;
+    min-width: 0;
+  }
+  .se-textbox--container.prefix input { border-radius: 0 4px 4px 0; border-left: none; }
+  .se-textbox--container.suffix input { border-radius: 4px 0 0 4px; border-right: none; }
+  .se-textbox--prefix, .se-textbox--suffix {
+    padding: 10px 12px;
+    background: #f0f0f0;
+    border: 1px solid #c7c7c7;
+    font-size: 14px;
+    color: #555;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+  }
+  .se-textbox--prefix { border-radius: 4px 0 0 4px; border-right: none; }
+  .se-textbox--suffix { border-radius: 0 4px 4px 0; border-left: none; }
+  .se-textbox--counter {
+    font-size: 11px;
+    color: #757575;
+    text-align: right;
+    margin-top: 4px;
+  }
+  select.textbox__control {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #c7c7c7;
+    border-radius: 4px;
+    background: #fff;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus, .rich-text-editor:focus {
+    outline: none;
+    border-color: #0064d2;
+    box-shadow: 0 0 0 3px rgba(0, 100, 210, 0.15);
+  }
+
+  /* Rich-text editor (contenteditable div, mirrors real eBay description) */
+  .rich-text-editor {
+    min-height: 140px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #c7c7c7;
+    border-radius: 4px;
+    background: #fff;
+    font-family: inherit;
+  }
+  .rich-text-editor:empty::before {
+    content: attr(data-placeholder);
+    color: #999;
+  }
+
+  .row { display: flex; gap: 16px; }
+  .row .se-field { flex: 1; }
+
+  /* Photos grid */
+  .uploader-thumbnails {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .uploader-thumbnail {
+    aspect-ratio: 1;
+    border: 2px dashed #c7c7c7;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #fafafa;
+    position: relative;
+  }
+  .uploader-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+  .uploader-thumbnail input[type="url"] {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    width: calc(100% - 8px);
+    padding: 4px 6px;
+    font-size: 11px;
+    border: 1px solid #c7c7c7;
+    border-radius: 3px;
+  }
+  .uploader-thumbnails-ux__header__photo-count {
+    font-size: 12px;
+    color: #757575;
+    margin-top: 8px;
+  }
+
+  /* Summary pills (mirrors eBay's summary__ classes) */
+  .smry {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #eef3ff;
+    color: #0064d2;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-right: 8px;
+  }
+
+  .action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    margin-top: 24px;
+  }
+  button {
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 24px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    font-family: inherit;
+  }
+  button.primary { background: #3665f3; color: #fff; border-color: #3665f3; }
+  button.primary:hover { background: #2550d3; }
+  button.secondary { background: #fff; color: #3665f3; border-color: #3665f3; }
+  button.secondary:hover { background: #eef3ff; }
+
+  #status-banner {
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    display: none;
+  }
+  #status-banner.success { background: #e7f8ee; color: #0b6b2a; border: 1px solid #b6e2c5; display: block; }
+  #status-banner.partial { background: #fff6e0; color: #8a5b00; border: 1px solid #f2cc7a; display: block; }
+
+  #inspection-panel {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 380px;
+    max-height: 55vh;
+    overflow: auto;
+    background: #111820;
+    color: #d0eaff;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    z-index: 9999;
+  }
+  #inspection-panel h3 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+  }
+  #inspection-panel pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .minimize-btn {
+    background: none;
+    border: 1px solid #4a5563;
+    color: #d0eaff;
+    padding: 2px 6px;
+    font-size: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .dev-note {
+    background: #fff6e0;
+    border: 1px solid #f2cc7a;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    color: #5a3d00;
+  }
+  .dev-note strong { display: block; margin-bottom: 4px; }
+  .dev-note code {
+    background: #fff;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span>m</span><span>o</span><span>c</span><span>k</span>Bay
+  </div>
+  <div class="page-title">Sell your item / Create listing</div>
+</header>
+
+<main>
+  <h1>Tell us about your item</h1>
+
+  <div class="dev-note">
+    <strong>Developer note (visible to candidates):</strong>
+    This mock mirrors the selector patterns of eBay's real "Sell your item" form.
+    Element IDs follow the <code>s0-1-0-25-5-@SECTION-...</code> hash pattern and
+    <em>will not be stable</em> across product categories or sessions — do not
+    rely on exact IDs. Stable anchors: <code>aria-label</code>,
+    <code>[id*="@SECTION"]</code> substring, and eBay's <code>se-field</code> /
+    <code>summary__*</code> classes.
+  </div>
+
+  <div id="status-banner"></div>
+
+  <form id="mainContentForm" autocomplete="off" onsubmit="return false;">
+
+    <!-- PHOTOS (@PHOTOS) -->
+    <section class="card" data-testid="photos-section">
+      <h2>Photos</h2>
+      <div class="uploader-thumbnails" id="s0-1-0-25-5-@PHOTOS-1-22-6-0-36-5-9-14-grid">
+        <div class="uploader-thumbnail" data-slot="1" data-testid="photo-slot-1">
+          <input type="url"
+                 id="s0-1-0-25-5-@PHOTOS-1-33-4-3-1-se-textbox"
+                 name="photoUrl1"
+                 class="textbox textbox--fluid se-textbox--input"
+                 aria-label="Primary photo URL"
+                 placeholder="Primary image URL" />
+        </div>
+        <div class="uploader-thumbnail" data-slot="2" data-testid="photo-slot-2">
+          <input type="url"
+                 id="s0-1-0-25-5-@PHOTOS-1-33-4-3-2-se-textbox"
+                 name="photoUrl2"
+                 class="textbox textbox--fluid se-textbox--input"
+                 aria-label="Photo URL 2"
+                 placeholder="Image URL 2" />
+        </div>
+        <div class="uploader-thumbnail" data-slot="3" data-testid="photo-slot-3">
+          <input type="url"
+                 id="s0-1-0-25-5-@PHOTOS-1-33-4-3-3-se-textbox"
+                 name="photoUrl3"
+                 class="textbox textbox--fluid se-textbox--input"
+                 aria-label="Photo URL 3"
+                 placeholder="Image URL 3" />
+        </div>
+        <div class="uploader-thumbnail" data-slot="4" data-testid="photo-slot-4">
+          <input type="url"
+                 id="s0-1-0-25-5-@PHOTOS-1-33-4-3-4-se-textbox"
+                 name="photoUrl4"
+                 class="textbox textbox--fluid se-textbox--input"
+                 aria-label="Photo URL 4"
+                 placeholder="Image URL 4" />
+        </div>
+      </div>
+      <div class="uploader-thumbnails-ux__header__photo-count" id="photo-count-display">0 of 24 photos</div>
+    </section>
+
+    <!-- TITLE (@TITLE) -->
+    <section class="card" data-testid="title-section">
+      <h2>Item title</h2>
+
+      <div class="se-field se-field--fluid summary__title--narrow-field field">
+        <label for="s0-1-0-25-5-@TITLE-5-33-11-4-se-textbox">Title</label>
+        <div class="se-textbox--container se-textbox--fluid counter">
+          <input type="text"
+                 id="s0-1-0-25-5-@TITLE-5-33-11-4-se-textbox"
+                 name="title"
+                 class="textbox textbox--large textbox--fluid se-textbox--input"
+                 aria-label="Item title"
+                 maxlength="80"
+                 placeholder="Include brand, model, size, color" />
+        </div>
+        <div class="se-textbox--counter" id="s0-1-0-25-5-@TITLE-5-33-11-4-se-textbox-counter">0/80</div>
+      </div>
+
+      <div class="se-field se-field--fluid">
+        <label for="s0-1-0-25-5-@TITLE-5-33-12-4-se-textbox">Subtitle <span style="font-weight:400;color:#757575;">(optional, $3.00 fee on real eBay)</span></label>
+        <div class="se-textbox--container se-textbox--fluid">
+          <input type="text"
+                 id="s0-1-0-25-5-@TITLE-5-33-12-4-se-textbox"
+                 name="subtitle"
+                 class="textbox textbox--fluid se-textbox--input"
+                 aria-label="Subtitle"
+                 maxlength="55" />
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORY & CONDITION (shown as summary__ classes on real eBay) -->
+    <section class="card" data-testid="category-condition-section">
+      <h2>Category &amp; condition</h2>
+
+      <div class="row">
+        <div class="se-field se-field--fluid smry summary__category">
+          <label for="s0-1-0-25-5-@ATTRIBUTES-category-select">Category</label>
+          <select id="s0-1-0-25-5-@ATTRIBUTES-category-select"
+                  name="categoryId"
+                  class="textbox__control competitive-category"
+                  aria-label="Edit Item category">
+            <option value="">Select a category</option>
+            <option value="11450">Clothing, Shoes &amp; Accessories</option>
+            <option value="58058">Cell Phones &amp; Accessories</option>
+            <option value="15032">Computers/Tablets &amp; Networking</option>
+            <option value="293">Consumer Electronics</option>
+            <option value="11700">Home &amp; Garden</option>
+            <option value="888">Sporting Goods</option>
+            <option value="220">Toys &amp; Hobbies</option>
+            <option value="26395">Health &amp; Beauty</option>
+            <option value="9800">Books, Movies &amp; Music</option>
+            <option value="1305">Jewelry &amp; Watches</option>
+          </select>
+        </div>
+
+        <div class="se-field se-field--fluid smry summary__condition">
+          <label for="s0-1-0-25-5-@ATTRIBUTES-condition-select">Condition</label>
+          <select id="s0-1-0-25-5-@ATTRIBUTES-condition-select"
+                  name="conditionId"
+                  class="textbox__control"
+                  aria-label="Condition">
+            <option value="">Select condition</option>
+            <option value="1000">New</option>
+            <option value="1500">New other (see details)</option>
+            <option value="2000">Manufacturer refurbished</option>
+            <option value="2500">Seller refurbished</option>
+            <option value="3000">Used</option>
+            <option value="7000">For parts or not working</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="se-field se-field--fluid">
+        <label for="s0-1-0-25-5-@ATTRIBUTES-1-33-3-brand-se-textbox">Brand</label>
+        <div class="se-textbox--container se-textbox--fluid">
+          <input type="text"
+                 id="s0-1-0-25-5-@ATTRIBUTES-1-33-3-brand-se-textbox"
+                 name="brand"
+                 class="textbox textbox--fluid se-textbox--input"
+                 aria-label="Brand"
+                 placeholder="e.g., Nike" />
+        </div>
+      </div>
+
+      <div class="se-field se-field--fluid">
+        <label for="s0-1-0-25-5-@ATTRIBUTES-1-33-3-sku-se-textbox">Custom label (SKU)</label>
+        <div class="se-textbox--container se-textbox--fluid">
+          <input type="text"
+                 id="s0-1-0-25-5-@ATTRIBUTES-1-33-3-sku-se-textbox"
+                 name="sku"
+                 class="textbox textbox--fluid se-textbox--input"
+                 aria-label="Custom label (SKU)"
+                 placeholder="Your internal SKU" />
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING (@PRICE) -->
+    <section class="card" data-testid="pricing-section">
+      <h2>Pricing</h2>
+
+      <div class="se-field se-field--fluid">
+        <label for="s0-1-0-25-5-@PRICE-1-33-2-8-5-format">Format</label>
+        <select id="s0-1-0-25-5-@PRICE-1-33-2-8-5-format"
+                name="listingFormat"
+                class="textbox__control"
+                aria-label="Listing format">
+          <option value="FixedPrice">Buy It Now (fixed price)</option>
+          <option value="Auction">Auction</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <div class="se-field se-field--fluid summary__price-best-offer-textbox">
+          <label for="s0-1-0-25-5-@PRICE-1-33-2-14-3-2-se-textbox">Buy It Now price</label>
+          <div class="se-textbox--container prefix se-textbox--fluid">
+            <span class="se-textbox--prefix" id="s0-1-0-25-5-@PRICE-1-33-2-14-3-2-se-textbox-prefix">USD $</span>
+            <input type="number"
+                   step="0.01"
+                   min="0"
+                   id="s0-1-0-25-5-@PRICE-1-33-2-14-3-2-se-textbox"
+                   name="price"
+                   class="textbox textbox--fluid se-textbox--input"
+                   aria-label="Item price"
+                   placeholder="0.00" />
+          </div>
+        </div>
+
+        <div class="se-field se-field--fluid summary__price-fields-short quantity">
+          <label for="s0-1-0-25-5-@PRICE-1-33-2-21-3-se-textbox">Quantity</label>
+          <div class="se-textbox--container se-textbox--fluid">
+            <input type="number"
+                   min="1"
+                   id="s0-1-0-25-5-@PRICE-1-33-2-21-3-se-textbox"
+                   name="quantity"
+                   class="textbox textbox--fluid se-textbox--input"
+                   aria-label="Quantity"
+                   value="1" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DESCRIPTION (@DESCRIPTION, rich text editor like real eBay) -->
+    <section class="card" data-testid="description-section">
+      <h2>Description</h2>
+      <div class="se-field se-field--fluid rich-text-editor field">
+        <label for="s0-1-0-25-5-@DESCRIPTION-1-33-@rich-text-editor-rawEditor">Describe your item</label>
+        <div id="s0-1-0-25-5-@DESCRIPTION-1-33-@rich-text-editor-rawEditor"
+             class="rich-text-editor"
+             contenteditable="true"
+             role="textbox"
+             aria-label="Description"
+             data-placeholder="Details about condition, features, what's included..."></div>
+        <div class="hint">Rich text editor. Value is read from <code>innerHTML</code> or <code>innerText</code>, not <code>.value</code>.</div>
+      </div>
+    </section>
+
+    <!-- SHIPPING (@SHIPPING) -->
+    <section class="card" data-testid="shipping-section">
+      <h2>Shipping</h2>
+      <div class="row">
+        <div class="se-field se-field--fluid">
+          <label for="s0-1-0-25-5-@SHIPPING-0-33-6-1-2-shippingPolicyId">Shipping service</label>
+          <select id="s0-1-0-25-5-@SHIPPING-0-33-6-1-2-shippingPolicyId"
+                  name="shippingService"
+                  class="textbox__control"
+                  aria-label="Shipping service">
+            <option value="USPSGround">USPS Ground Advantage (2-5 business days)</option>
+            <option value="USPSPriority">USPS Priority Mail (1-3 business days)</option>
+            <option value="UPSGround">UPS Ground</option>
+            <option value="FedExGround">FedEx Ground</option>
+            <option value="Economy">Economy shipping (10-23 business days)</option>
+          </select>
+        </div>
+        <div class="se-field se-field--fluid">
+          <label for="s0-1-0-25-5-@SHIPPING-0-33-6-3-5-36-8-se-textbox">Shipping cost</label>
+          <div class="se-textbox--container prefix se-textbox--fluid">
+            <span class="se-textbox--prefix">USD $</span>
+            <input type="number"
+                   step="0.01"
+                   min="0"
+                   id="s0-1-0-25-5-@SHIPPING-0-33-6-3-5-36-8-se-textbox"
+                   name="shippingCost"
+                   class="textbox textbox--fluid se-textbox--input"
+                   aria-label="Shipping cost"
+                   placeholder="0.00" />
+          </div>
+        </div>
+      </div>
+      <div class="se-field se-field--fluid">
+        <label for="s0-1-0-25-5-@SHIPPING-0-33-handling-time-select">Handling time</label>
+        <select id="s0-1-0-25-5-@SHIPPING-0-33-handling-time-select"
+                name="handlingTime"
+                class="textbox__control"
+                aria-label="Handling time">
+          <option value="1">1 business day</option>
+          <option value="2">2 business days</option>
+          <option value="3">3 business days</option>
+          <option value="5">5 business days</option>
+          <option value="10">10 business days</option>
+        </select>
+      </div>
+      <div class="se-field se-field--fluid">
+        <label for="s0-1-0-25-5-@SHIPPING-0-33-9-item-origin-country-of-origin">Item location (country of origin)</label>
+        <select id="s0-1-0-25-5-@SHIPPING-0-33-9-item-origin-country-of-origin"
+                name="countryOfOrigin"
+                class="textbox__control"
+                aria-label="Country of origin">
+          <option value="US">United States</option>
+          <option value="CN">China</option>
+          <option value="PH">Philippines</option>
+          <option value="GB">United Kingdom</option>
+          <option value="DE">Germany</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- ACTION BAR -->
+    <div class="action-bar">
+      <button class="secondary" type="button" id="save-draft-btn">Save as draft</button>
+      <button class="primary" type="button" id="list-it-btn">List it</button>
+    </div>
+
+  </form>
+</main>
+
+<!-- Inspection panel -->
+<div id="inspection-panel">
+  <h3>
+    <span>Form state (live)</span>
+    <button class="minimize-btn" id="toggle-panel">hide</button>
+  </h3>
+  <pre id="inspection-output">{}</pre>
+</div>
+
+<script>
+(function() {
+  const form = document.getElementById('mainContentForm');
+  const output = document.getElementById('inspection-output');
+  const banner = document.getElementById('status-banner');
+  const photoCount = document.getElementById('photo-count-display');
+  const titleCounter = document.getElementById('s0-1-0-25-5-@TITLE-5-33-11-4-se-textbox-counter');
+
+  // Helper: get element by aria-label (eBay's stable selector pattern)
+  function byAria(label) {
+    return document.querySelector(`[aria-label="${label}"]`);
+  }
+
+  // Helper: get element whose id contains the @SECTION anchor and a keyword
+  function bySection(section, keyword) {
+    const selector = `[id*="@${section}"]`;
+    const candidates = document.querySelectorAll(selector);
+    if (!keyword) return candidates[0];
+    return Array.from(candidates).find(el => el.id.toLowerCase().includes(keyword.toLowerCase()));
+  }
+
+  function getDescriptionValue() {
+    const el = byAria('Description');
+    if (!el) return '';
+    // Real eBay description is contenteditable — read innerText
+    return el.innerText || el.textContent || '';
+  }
+
+  function snapshot() {
+    const photos = [
+      byAria('Primary photo URL')?.value || '',
+      byAria('Photo URL 2')?.value || '',
+      byAria('Photo URL 3')?.value || '',
+      byAria('Photo URL 4')?.value || ''
+    ].filter(Boolean);
+
+    const data = {
+      title: byAria('Item title')?.value || '',
+      subtitle: byAria('Subtitle')?.value || '',
+      category: byAria('Edit Item category')?.value || '',
+      condition: byAria('Condition')?.value || '',
+      brand: byAria('Brand')?.value || '',
+      sku: byAria('Custom label (SKU)')?.value || '',
+      format: byAria('Listing format')?.value || '',
+      price: byAria('Item price')?.value || '',
+      quantity: byAria('Quantity')?.value || '',
+      description: getDescriptionValue(),
+      shippingService: byAria('Shipping service')?.value || '',
+      shippingCost: byAria('Shipping cost')?.value || '',
+      handlingTime: byAria('Handling time')?.value || '',
+      countryOfOrigin: byAria('Country of origin')?.value || '',
+      photos
+    };
+
+    output.textContent = JSON.stringify(data, null, 2);
+    photoCount.textContent = `${photos.length} of 24 photos`;
+
+    const t = data.title || '';
+    if (titleCounter) titleCounter.textContent = `${t.length}/80`;
+
+    // Update photo previews
+    for (let i = 1; i <= 4; i++) {
+      const slot = document.querySelector(`[data-slot="${i}"]`);
+      if (!slot) continue;
+      const input = slot.querySelector('input');
+      const url = input ? input.value : '';
+      const existing = slot.querySelector('img');
+      if (url && (!existing || existing.src !== url)) {
+        if (existing) existing.remove();
+        const img = document.createElement('img');
+        img.src = url;
+        img.onerror = () => img.remove();
+        slot.insertBefore(img, input);
+      } else if (!url && existing) {
+        existing.remove();
+      }
+    }
+
+    return data;
+  }
+
+  // Listen to input/change on the form
+  form.addEventListener('input', snapshot);
+  form.addEventListener('change', snapshot);
+
+  // Also watch the contenteditable description for changes
+  const desc = byAria('Description');
+  if (desc) {
+    desc.addEventListener('input', snapshot);
+    desc.addEventListener('blur', snapshot);
+    // MutationObserver too, since some extensions write directly to innerHTML
+    new MutationObserver(snapshot).observe(desc, { childList: true, subtree: true, characterData: true });
+  }
+
+  // Also watch photo inputs with MutationObserver to catch extensions that set
+  // .value via Object.defineProperty-bypassed React/Vue style dispatches
+  document.querySelectorAll('input, select').forEach(el => {
+    const orig = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value') ||
+                 Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+    el.addEventListener('change', snapshot);
+    el.addEventListener('input', snapshot);
+  });
+
+  // Periodic poll as a safety net — real eBay also polls for state changes
+  setInterval(snapshot, 500);
+
+  document.getElementById('save-draft-btn').addEventListener('click', () => {
+    const data = snapshot();
+    const filled = Object.keys(data).filter(k => {
+      const v = data[k];
+      return Array.isArray(v) ? v.length > 0 : !!v;
+    }).length;
+    banner.className = filled > 6 ? 'success' : 'partial';
+    banner.textContent = `Draft saved. ${filled} fields filled. (Mock — no real listing created.)`;
+  });
+
+  document.getElementById('list-it-btn').addEventListener('click', () => {
+    const data = snapshot();
+    const required = ['title', 'category', 'condition', 'price', 'description'];
+    const missing = required.filter(k => !data[k]);
+    if (missing.length) {
+      banner.className = 'partial';
+      banner.textContent = `Missing required fields: ${missing.join(', ')}. (Mock — no real listing created.)`;
+    } else {
+      banner.className = 'success';
+      banner.textContent = `Listing would be created. All required fields present. (Mock — no real listing created.)`;
+    }
+  });
+
+  let hidden = false;
+  document.getElementById('toggle-panel').addEventListener('click', () => {
+    hidden = !hidden;
+    const pre = document.getElementById('inspection-output');
+    pre.style.display = hidden ? 'none' : 'block';
+    document.getElementById('toggle-panel').textContent = hidden ? 'show' : 'hide';
+  });
+
+  snapshot();
+  window.__mockEbayState = snapshot;
+})();
+</script>
+
+</body>
+</html>
