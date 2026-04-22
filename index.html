@@ -38,7 +38,7 @@
   }
   .card h2 { font-size: 18px; margin: 0 0 16px 0; }
 
-  /* eBay-style field/textbox design-system classes — mirrored from real eBay */
+  /* eBay-style field/textbox design-system classes */
   .se-field { margin-bottom: 16px; }
   .se-field--fluid { width: 100%; }
   .se-field > label {
@@ -122,33 +122,97 @@
   .row { display: flex; gap: 16px; }
   .row .se-field { flex: 1; }
 
-  /* Photos grid */
-  .uploader-thumbnails {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-  .uploader-thumbnail {
-    aspect-ratio: 1;
+  /* PHOTO UPLOADER (mirrors real eBay: drag-drop zone + file picker) */
+  .uploader-ui-ux {
     border: 2px dashed #c7c7c7;
-    border-radius: 6px;
+    border-radius: 8px;
+    background: #fafafa;
+    padding: 32px 24px;
+    text-align: center;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .uploader-ui-ux.dragover {
+    border-color: #0064d2;
+    background: #eef3ff;
+  }
+  .uploader-ui-ux__photo-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    color: #757575;
+  }
+  .uploader-ui-ux__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111820;
+    margin-bottom: 4px;
+  }
+  .uploader-ui-ux__subtitle {
+    font-size: 13px;
+    color: #757575;
+    margin-bottom: 12px;
+  }
+  .uploader-ui-ux__buttons {
     display: flex;
-    align-items: center;
+    gap: 8px;
     justify-content: center;
+    margin-top: 12px;
+  }
+  .uploader-ui-ux__buttons button {
+    padding: 6px 14px;
+    font-size: 13px;
+    border: 1px solid #3665f3;
+    color: #3665f3;
+    background: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  .uploader-file-input {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+  .uploader-thumbnails-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .uploader-thumbnails-grid:empty { display: none; }
+  .uploader-thumbnail-card {
+    aspect-ratio: 1;
+    border: 1px solid #c7c7c7;
+    border-radius: 6px;
     overflow: hidden;
     background: #fafafa;
     position: relative;
   }
-  .uploader-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
-  .uploader-thumbnail input[type="url"] {
+  .uploader-thumbnail-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .uploader-thumbnail-card .primary-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: rgba(17, 24, 32, 0.8);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .uploader-thumbnail-card .size-badge {
     position: absolute;
     bottom: 4px;
-    left: 4px;
     right: 4px;
-    width: calc(100% - 8px);
-    padding: 4px 6px;
-    font-size: 11px;
-    border: 1px solid #c7c7c7;
+    background: rgba(17, 24, 32, 0.6);
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 5px;
     border-radius: 3px;
   }
   .uploader-thumbnails-ux__header__photo-count {
@@ -207,7 +271,7 @@
     bottom: 16px;
     right: 16px;
     width: 380px;
-    max-height: 55vh;
+    max-height: 60vh;
     overflow: auto;
     background: #111820;
     color: #d0eaff;
@@ -255,6 +319,8 @@
     border-radius: 3px;
     font-size: 12px;
   }
+  .dev-note ul { margin: 8px 0 0 0; padding-left: 20px; }
+  .dev-note li { margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -271,12 +337,21 @@
 
   <div class="dev-note">
     <strong>Developer note (visible to candidates):</strong>
-    This mock mirrors the selector patterns of eBay's real "Sell your item" form.
-    Element IDs follow the <code>s0-1-0-25-5-@SECTION-...</code> hash pattern and
-    <em>will not be stable</em> across product categories or sessions — do not
-    rely on exact IDs. Stable anchors: <code>aria-label</code>,
-    <code>[id*="@SECTION"]</code> substring, and eBay's <code>se-field</code> /
-    <code>summary__*</code> classes.
+    This mock mirrors the selector patterns and upload mechanics of eBay's real
+    "Sell your item" form. A few important details:
+    <ul>
+      <li>Element IDs follow eBay's <code>s0-1-0-25-5-@SECTION-...</code> hash pattern
+        and are <em>not stable</em> across product categories or sessions.
+        Stable anchors: <code>aria-label</code>,
+        <code>[id*="@SECTION"]</code>, and <code>se-field</code> / <code>summary__*</code> classes.</li>
+      <li>Photos are a real <code>&lt;input type="file"&gt;</code> with a drag-and-drop zone —
+        not URL fields. To upload programmatically you'll need to build a
+        <code>DataTransfer</code>, assign to <code>input.files</code>, and
+        dispatch a <code>change</code> event. Setting <code>files</code> without
+        dispatching the event will <em>not</em> register.</li>
+      <li>Description is a <code>contenteditable</code> div, not a textarea —
+        <code>.value = ...</code> will not work.</li>
+    </ul>
   </div>
 
   <div id="status-banner"></div>
@@ -286,40 +361,33 @@
     <!-- PHOTOS (@PHOTOS) -->
     <section class="card" data-testid="photos-section">
       <h2>Photos</h2>
-      <div class="uploader-thumbnails" id="s0-1-0-25-5-@PHOTOS-1-22-6-0-36-5-9-14-grid">
-        <div class="uploader-thumbnail" data-slot="1" data-testid="photo-slot-1">
-          <input type="url"
-                 id="s0-1-0-25-5-@PHOTOS-1-33-4-3-1-se-textbox"
-                 name="photoUrl1"
-                 class="textbox textbox--fluid se-textbox--input"
-                 aria-label="Primary photo URL"
-                 placeholder="Primary image URL" />
+
+      <div class="uploader-ui-ux"
+           id="s0-1-0-25-5-@PHOTOS-1-22-6-0-36-5-9-dropzone"
+           data-testid="photos-dropzone"
+           role="button"
+           aria-label="Upload photos">
+        <div class="uploader-ui-ux__photo-icon">+</div>
+        <div class="uploader-ui-ux__title">Drag photos here</div>
+        <div class="uploader-ui-ux__subtitle">or use one of the options below. JPG, PNG. Up to 24 photos.</div>
+        <div class="uploader-ui-ux__buttons">
+          <button type="button"
+                  id="s0-1-0-25-5-@PHOTOS-browse-btn"
+                  aria-label="Upload photos from computer">Upload from computer</button>
         </div>
-        <div class="uploader-thumbnail" data-slot="2" data-testid="photo-slot-2">
-          <input type="url"
-                 id="s0-1-0-25-5-@PHOTOS-1-33-4-3-2-se-textbox"
-                 name="photoUrl2"
-                 class="textbox textbox--fluid se-textbox--input"
-                 aria-label="Photo URL 2"
-                 placeholder="Image URL 2" />
-        </div>
-        <div class="uploader-thumbnail" data-slot="3" data-testid="photo-slot-3">
-          <input type="url"
-                 id="s0-1-0-25-5-@PHOTOS-1-33-4-3-3-se-textbox"
-                 name="photoUrl3"
-                 class="textbox textbox--fluid se-textbox--input"
-                 aria-label="Photo URL 3"
-                 placeholder="Image URL 3" />
-        </div>
-        <div class="uploader-thumbnail" data-slot="4" data-testid="photo-slot-4">
-          <input type="url"
-                 id="s0-1-0-25-5-@PHOTOS-1-33-4-3-4-se-textbox"
-                 name="photoUrl4"
-                 class="textbox textbox--fluid se-textbox--input"
-                 aria-label="Photo URL 4"
-                 placeholder="Image URL 4" />
-        </div>
+        <input type="file"
+               multiple
+               accept="image/*"
+               class="uploader-file-input"
+               id="s0-1-0-25-5-@PHOTOS-1-33-4-3-file-input"
+               name="photos"
+               aria-label="Photo file input" />
       </div>
+
+      <div class="uploader-thumbnails-grid"
+           id="s0-1-0-25-5-@PHOTOS-thumbnails-grid"
+           data-testid="photo-thumbnails"></div>
+
       <div class="uploader-thumbnails-ux__header__photo-count" id="photo-count-display">0 of 24 photos</div>
     </section>
 
@@ -354,7 +422,7 @@
       </div>
     </section>
 
-    <!-- CATEGORY & CONDITION (shown as summary__ classes on real eBay) -->
+    <!-- CATEGORY & CONDITION -->
     <section class="card" data-testid="category-condition-section">
       <h2>Category &amp; condition</h2>
 
@@ -467,7 +535,7 @@
       </div>
     </section>
 
-    <!-- DESCRIPTION (@DESCRIPTION, rich text editor like real eBay) -->
+    <!-- DESCRIPTION (@DESCRIPTION) -->
     <section class="card" data-testid="description-section">
       <h2>Description</h2>
       <div class="se-field se-field--fluid rich-text-editor field">
@@ -567,35 +635,56 @@
   const banner = document.getElementById('status-banner');
   const photoCount = document.getElementById('photo-count-display');
   const titleCounter = document.getElementById('s0-1-0-25-5-@TITLE-5-33-11-4-se-textbox-counter');
+  const fileInput = document.getElementById('s0-1-0-25-5-@PHOTOS-1-33-4-3-file-input');
+  const dropzone = document.getElementById('s0-1-0-25-5-@PHOTOS-1-22-6-0-36-5-9-dropzone');
+  const browseBtn = document.getElementById('s0-1-0-25-5-@PHOTOS-browse-btn');
+  const thumbnailsGrid = document.getElementById('s0-1-0-25-5-@PHOTOS-thumbnails-grid');
 
-  // Helper: get element by aria-label (eBay's stable selector pattern)
+  // uploadedFiles is the canonical state — it ONLY updates on real events
+  // (change / drop), mimicking how a real framework-backed page would work.
+  // Setting input.files without dispatching the event will NOT populate this.
+  let uploadedFiles = [];
+
   function byAria(label) {
     return document.querySelector(`[aria-label="${label}"]`);
-  }
-
-  // Helper: get element whose id contains the @SECTION anchor and a keyword
-  function bySection(section, keyword) {
-    const selector = `[id*="@${section}"]`;
-    const candidates = document.querySelectorAll(selector);
-    if (!keyword) return candidates[0];
-    return Array.from(candidates).find(el => el.id.toLowerCase().includes(keyword.toLowerCase()));
   }
 
   function getDescriptionValue() {
     const el = byAria('Description');
     if (!el) return '';
-    // Real eBay description is contenteditable — read innerText
     return el.innerText || el.textContent || '';
   }
 
-  function snapshot() {
-    const photos = [
-      byAria('Primary photo URL')?.value || '',
-      byAria('Photo URL 2')?.value || '',
-      byAria('Photo URL 3')?.value || '',
-      byAria('Photo URL 4')?.value || ''
-    ].filter(Boolean);
+  function humanFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
 
+  function renderThumbnails() {
+    thumbnailsGrid.innerHTML = '';
+    uploadedFiles.forEach((file, i) => {
+      const card = document.createElement('div');
+      card.className = 'uploader-thumbnail-card';
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {}; // keep reference; don't revoke while displayed
+      card.appendChild(img);
+      if (i === 0) {
+        const badge = document.createElement('span');
+        badge.className = 'primary-badge';
+        badge.textContent = 'Primary';
+        card.appendChild(badge);
+      }
+      const sizeBadge = document.createElement('span');
+      sizeBadge.className = 'size-badge';
+      sizeBadge.textContent = humanFileSize(file.size);
+      card.appendChild(sizeBadge);
+      thumbnailsGrid.appendChild(card);
+    });
+  }
+
+  function snapshot() {
     const data = {
       title: byAria('Item title')?.value || '',
       subtitle: byAria('Subtitle')?.value || '',
@@ -611,59 +700,82 @@
       shippingCost: byAria('Shipping cost')?.value || '',
       handlingTime: byAria('Handling time')?.value || '',
       countryOfOrigin: byAria('Country of origin')?.value || '',
-      photos
+      photos: uploadedFiles.map((f, i) => ({
+        index: i,
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        isPrimary: i === 0
+      }))
     };
 
     output.textContent = JSON.stringify(data, null, 2);
-    photoCount.textContent = `${photos.length} of 24 photos`;
+    photoCount.textContent = `${uploadedFiles.length} of 24 photos`;
 
     const t = data.title || '';
     if (titleCounter) titleCounter.textContent = `${t.length}/80`;
 
-    // Update photo previews
-    for (let i = 1; i <= 4; i++) {
-      const slot = document.querySelector(`[data-slot="${i}"]`);
-      if (!slot) continue;
-      const input = slot.querySelector('input');
-      const url = input ? input.value : '';
-      const existing = slot.querySelector('img');
-      if (url && (!existing || existing.src !== url)) {
-        if (existing) existing.remove();
-        const img = document.createElement('img');
-        img.src = url;
-        img.onerror = () => img.remove();
-        slot.insertBefore(img, input);
-      } else if (!url && existing) {
-        existing.remove();
-      }
-    }
-
     return data;
   }
 
-  // Listen to input/change on the form
+  // Handle file input change — the canonical "registered" event.
+  // Any extension that wants photos to count MUST dispatch this event.
+  fileInput.addEventListener('change', (e) => {
+    const files = Array.from(fileInput.files || []);
+    if (files.length === 0) return;
+    uploadedFiles = uploadedFiles.concat(files).slice(0, 24);
+    renderThumbnails();
+    snapshot();
+  });
+
+  // Drag-and-drop support on the dropzone
+  ['dragenter', 'dragover'].forEach(ev => {
+    dropzone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(ev => {
+    dropzone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('dragover');
+    });
+  });
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const dt = e.dataTransfer;
+    const files = Array.from(dt.files || []).filter(f => f.type.startsWith('image/'));
+    if (files.length === 0) return;
+    uploadedFiles = uploadedFiles.concat(files).slice(0, 24);
+    renderThumbnails();
+    snapshot();
+  });
+
+  // Click on dropzone (or the Upload from computer button) opens the file picker
+  dropzone.addEventListener('click', (e) => {
+    // Don't re-trigger if they clicked the hidden input itself
+    if (e.target === fileInput) return;
+    fileInput.click();
+  });
+  browseBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.click();
+  });
+
+  // Standard form listeners for the text/select fields
   form.addEventListener('input', snapshot);
   form.addEventListener('change', snapshot);
 
-  // Also watch the contenteditable description for changes
   const desc = byAria('Description');
   if (desc) {
     desc.addEventListener('input', snapshot);
     desc.addEventListener('blur', snapshot);
-    // MutationObserver too, since some extensions write directly to innerHTML
     new MutationObserver(snapshot).observe(desc, { childList: true, subtree: true, characterData: true });
   }
 
-  // Also watch photo inputs with MutationObserver to catch extensions that set
-  // .value via Object.defineProperty-bypassed React/Vue style dispatches
-  document.querySelectorAll('input, select').forEach(el => {
-    const orig = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value') ||
-                 Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
-    el.addEventListener('change', snapshot);
-    el.addEventListener('input', snapshot);
-  });
-
-  // Periodic poll as a safety net — real eBay also polls for state changes
+  // Periodic poll as a safety net
   setInterval(snapshot, 500);
 
   document.getElementById('save-draft-btn').addEventListener('click', () => {
@@ -673,19 +785,20 @@
       return Array.isArray(v) ? v.length > 0 : !!v;
     }).length;
     banner.className = filled > 6 ? 'success' : 'partial';
-    banner.textContent = `Draft saved. ${filled} fields filled. (Mock — no real listing created.)`;
+    banner.textContent = `Draft saved. ${filled} fields filled, ${uploadedFiles.length} photos. (Mock — no real listing created.)`;
   });
 
   document.getElementById('list-it-btn').addEventListener('click', () => {
     const data = snapshot();
     const required = ['title', 'category', 'condition', 'price', 'description'];
     const missing = required.filter(k => !data[k]);
+    if (uploadedFiles.length === 0) missing.push('photos');
     if (missing.length) {
       banner.className = 'partial';
-      banner.textContent = `Missing required fields: ${missing.join(', ')}. (Mock — no real listing created.)`;
+      banner.textContent = `Missing required: ${missing.join(', ')}. (Mock — no real listing created.)`;
     } else {
       banner.className = 'success';
-      banner.textContent = `Listing would be created. All required fields present. (Mock — no real listing created.)`;
+      banner.textContent = `Listing would be created. All required fields present, ${uploadedFiles.length} photos. (Mock — no real listing created.)`;
     }
   });
 
